@@ -1,0 +1,53 @@
+#include <vector>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+bool compare(pair<int,int>p1, pair<int,int>p2)
+{
+    double v1 = (double) p1.first/p1.second;
+    double v2 = (double) p2.first/p2.second;
+    return v1>v2;
+}
+
+int main()
+{
+    int n;
+    cout<<"Enter the Number of Items : "<<endl;
+    cin>>n;
+    vector<pair<int,int>>items(n);
+    cout<<"For Each item, Enter the Profit and Weight : "<<endl;
+    for(int i=1; i<=n; i++)
+    {
+        cout<<"Item "<<i<<endl;
+        cout<<"Enter Profit : ";
+        cin>>items[i-1].first;
+        cout<<"Enter Weight : ";
+        cin>>items[i-1].second;
+        cout<<endl;
+    }
+    int weight;
+    cout<<"Enter the Weight of the Knapsack : ";
+    cin>>weight;
+
+    sort(items.begin(),items.end(),compare);
+    double ans = 0;
+    for(int i=0; i<n; i++)
+    {
+        if(weight >= items[i].second)
+        {
+            ans += items[i].first;
+            weight-=items[i].second;
+            continue;
+        }
+        double pw = (double) items[i].first/items[i].second;
+        ans += pw*weight;
+        weight = 0;
+        break;
+    }
+
+    cout<<"Maximum Profit Achieved using Greedy Strategy is : "<<ans<<endl;
+}
+
+// Time Complexity : O(N)
+// Space Complexity : O(1)
