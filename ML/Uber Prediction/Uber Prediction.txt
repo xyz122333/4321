@@ -1,0 +1,110 @@
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from scipy import stats
+
+
+df =  pd.read_csv('uber.csv')
+df.head(7)
+
+
+df.describe() 
+
+
+df.isna().sum()
+
+
+df.shape
+
+
+df.dtypes
+
+
+df = df.drop(['Unnamed: 0', 'key', 'pickup_datetime'], axis = 1)
+
+
+numeric_col = df.select_dtypes(include=np.number).columns.tolist()
+df=df.bfill()
+df=df.ffill()
+df.isna().sum()
+
+
+numeric_col = df.select_dtypes(include=np.number).columns.tolist()
+# df[numeric_col]=df[numeric_col].fillna(df[numeric_col].mean())
+df=df.bfill()
+df=df.ffill()
+df.isna().sum()
+
+
+v=df['fare_amount'].unique() # unique values present in column
+print(v)
+print("length ",v.size)
+
+
+df.rename(columns={'fare_amount':'fareAmount'},inplace = True)  
+df
+
+
+df.hist()
+
+
+# IQR 
+# Calculate the first quartile (Q1) and third quartile (Q3) for 'fare_amount'
+Q1 = df['fareAmount'].quantile(0.25)
+Q3 = np.percentile(df['fareAmount'], 75, interpolation='midpoint')
+
+# Calculate the Interquartile Range (IQR)
+IQR = Q3 - Q1
+
+# Print the results
+print("Q1:", Q1)
+print("Q3:", Q3)
+print("IQR:", IQR)
+
+df_new = df[(df['fareAmount'] <= (Q3+1.5*IQR)) & (df['fareAmount'] >= (Q1-1.5*IQR))]
+df_new.plot(kind='hist', y='fareAmount')  # Almost normal
+
+
+sns.boxplot(df['fareAmount'])
+
+
+corr = df.corr()
+sns.heatmap(corr, annot=True)
+
+
+
+# Train Test Split
+from sklearn.model_selection import train_test_split
+X = df.drop(['fareAmount'], axis=1)
+y = df['fareAmount']
+
+X_train, x_test, y_train, y_test = train_test_split(X, y)
+
+
+from sklearn.linear_model import LinearRegression
+model = LinearRegression()
+model.fit(X_train, y_train)
+y_pred = model.predict(x_test)
+
+
+from sklearn.metrics import mean_squared_error, r2_score
+RMSE = np.sqrt(mean_squared_error(y_test, y_pred))
+print("RMSE -> ", RMSE)
+R2 = r2_score(y_test, y_pred)
+print("R2 -> ", R2)
+#You want RMSE to be as low as possible, ideally close to zero.
+# An R² score close to 1 means the model explains most of the variance in the target variable (e.g., fareAmount). 
+# Conversely, an R² score near 0 or negative indicates a poor fit.
+
+
+from sklearn.ensemble import RandomForestRegressor
+model = RandomForestRegressor()
+model.fit(X_train, y_train)
+y_pred = model.predict(x_test)
+
+
+from sklearn.metrics import mean_squared_error, r2_score
+RMSE = np.sqrt(mean_squared_error(y_test, y_pred))
+print("RMSE -> ", RMSE)
+R2 = r2_score(y_test, y_pred)
+print("R2 -> ", R2)

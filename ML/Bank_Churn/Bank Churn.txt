@@ -1,0 +1,116 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.callbacks import EarlyStopping
+import warnings
+warnings.filterwarnings('ignore')
+
+
+data = pd.read_csv('./Churn_Modelling.csv')
+print("Dataset Shape:", data.shape)
+data.head()
+
+
+X = data.drop(columns=['RowNumber', 'CustomerId', 'Surname', 'Exited'])
+y = data['Exited']  
+
+
+le_geography = LabelEncoder()
+X['Geography'] = le_geography.fit_transform(X['Geography'])
+
+
+le_gender = LabelEncoder()
+X['Gender'] = le_gender.fit_transform(X['Gender'])
+
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+
+model = Sequential()
+model.add(Dense(64, activation='relu', input_shape=(X_train.shape[1],)))
+model.add(Dropout(0.3))  
+model.add(Dense(32, activation='relu'))
+model.add(Dropout(0.3))
+model.add(Dense(1, activation='sigmoid'))  
+
+
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+
+model.summary()
+
+
+early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
+
+
+history = model.fit(X_train, y_train, epochs=50, batch_size=32, validation_split=0.2, callbacks=[early_stopping])
+
+
+plt.figure(figsize=(14, 5))
+plt.subplot(1, 2, 1)
+plt.plot(history.history['accuracy'], label='Train Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.title('Training and Validation Accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.legend()
+
+
+plt.subplot(1, 2, 2)
+plt.plot(history.history['loss'], label='Train Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.title('Training and Validation Loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+
+
+y_pred = (model.predict(X_test) > 0.5).astype("int32")
+
+
+accuracy = accuracy_score(y_test, y_pred)
+print("Accuracy Score:", accuracy)
+
+
+cm = confusion_matrix(y_test, y_pred)
+
+
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=['Not Churn', 'Churn'], yticklabels=['Not Churn', 'Churn'])
+plt.title("Confusion Matrix")
+plt.xlabel("Predicted Labels")
+plt.ylabel("True Labels")
+plt.show()
+
+
+print("Classification Report:\n", classification_report(y_test, y_pred))
+
+
+y_pred = (model.predict(X_test) > 0.5).astype("int32")
+
+
+y_test_df = y_test.reset_index(drop=True)
+
+
+predictions_df = pd.DataFrame(y_pred, columns=["Predicted"], index=y_test_df.index)
+
+
+results_df = X_test.copy()
+results_df = pd.DataFrame(scaler.inverse_transform(results_df), columns=X.columns)
+results_df['True Label'] = y_test_df
+results_df['Predicted Label'] = predictions_df
+
+
+results_df.head()
