@@ -1,0 +1,140 @@
+npm install -g truffle
+
+
+mkdir StudentDataProject
+cd StudentDataProject
+truffle init
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract StudentData {
+    struct Student {
+        uint id;
+        string name;
+        uint age;
+    }
+
+    Student[] public students;
+    uint public studentCount = 0;
+    address public owner;
+
+    // Event for logging student addition
+    event StudentAdded(uint id, string name, uint age);
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    // Modifier to restrict certain functions to only the owner
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can add students.");
+        _;
+    }
+
+    // Function to add a new student
+    function addStudent(string memory _name, uint _age) public onlyOwner {
+        students.push(Student(studentCount, _name, _age));
+        emit StudentAdded(studentCount, _name, _age);
+        studentCount++;
+    }
+
+    // Function to retrieve all students
+    function getAllStudents() public view returns (Student[] memory) {
+        return students;
+    }
+
+    // Fallback function to handle incorrect calls or Ether transfers
+    fallback() external payable {
+        revert("Invalid function call or Ether transfer not allowed.");
+    }
+
+    // Receive function to accept Ether but prevent unintended usage
+    receive() external payable {
+        revert("This contract does not accept Ether.");
+    }
+}
+
+
+truffle compile
+
+
+module.exports = {
+  networks: {
+    development: {
+      host: "127.0.0.1",
+      port: 7545,       // Ganache default port
+      network_id: "*"   // Match any network id
+    },
+    ropsten: {
+      provider: () =>
+        new HDWalletProvider("YOUR_MNEMONIC", "https://ropsten.infura.io/v3/YOUR_INFURA_PROJECT_ID"),
+      network_id: 3,       // Ropsten network id
+      gas: 5500000,        // Ropsten gas limit
+    }
+  },
+  compilers: {
+    solc: {
+      version: "^0.8.0",
+    },
+  },
+};
+
+
+const StudentData = artifacts.require("StudentData");
+
+module.exports = function (deployer) {
+  deployer.deploy(StudentData);
+};
+
+
+truffle migrate --network development
+
+
+truffle console --network development
+
+
+let studentData = await StudentData.deployed();
+
+
+let tx = await studentData.addStudent("Alice", 20, { from: YOUR_ADDRESS });
+console.log("Transaction Hash:", tx.tx);
+console.log("Gas Used:", tx.receipt.gasUsed);
+
+
+let students = await studentData.getAllStudents();
+console.log("Students:", students);
+
+
+await web3.eth.sendTransaction({ from: YOUR_ADDRESS, to: studentData.address, value: web3.utils.toWei("0.1", "ether") });
+
+
+const StudentData = artifacts.require("StudentData");
+
+contract("StudentData", (accounts) => {
+  let studentDataInstance;
+
+  before(async () => {
+    studentDataInstance = await StudentData.deployed();
+  });
+
+  it("should add a new student", async () => {
+    let tx = await studentDataInstance.addStudent("Bob", 22, { from: accounts[0] });
+    assert.equal(tx.receipt.gasUsed > 0, true, "Gas usage should be greater than zero.");
+    let student = await studentDataInstance.students(0);
+    assert.equal(student.name, "Bob", "Student name should be Bob.");
+    assert.equal(student.age.toNumber(), 22, "Student age should be 22.");
+  });
+
+  it("should revert on fallback function", async () => {
+    try {
+      await web3.eth.sendTransaction({ from: accounts[0], to: studentDataInstance.address, value: web3.utils.toWei("0.1", "ether") });
+    } catch (error) {
+      assert(error, "Fallback function did not revert as expected.");
+    }
+  });
+});
+
+
+truffle test

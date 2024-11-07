@@ -1,0 +1,126 @@
+npm install -g truffle
+
+
+mkdir BankAccountProject
+cd BankAccountProject
+truffle init
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract BankAccount {
+    address public owner;
+    uint public balance;
+
+    // Event to emit when a deposit is made
+    event Deposit(uint amount, uint newBalance);
+    // Event to emit when a withdrawal is made
+    event Withdraw(uint amount, uint newBalance);
+
+    constructor() {
+        owner = msg.sender; // Set the contract deployer as the owner
+    }
+
+    // Modifier to allow only the owner to call certain functions
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only the owner can call this function.");
+        _;
+    }
+
+    // Deposit function to add funds to the account
+    function deposit() external payable {
+        balance += msg.value;
+        emit Deposit(msg.value, balance);
+    }
+
+    // Withdraw function to remove funds from the account
+    function withdraw(uint _amount) external onlyOwner {
+        require(_amount <= balance, "Insufficient balance.");
+        balance -= _amount;
+        payable(owner).transfer(_amount);
+        emit Withdraw(_amount, balance);
+    }
+
+    // Function to check the account balance
+    function getBalance() external view returns (uint) {
+        return balance;
+    }
+}
+
+
+truffle compile
+
+
+module.exports = {
+  networks: {
+    development: {
+      host: "127.0.0.1",
+      port: 7545,       // Ganache default port
+      network_id: "*"   // Match any network id
+    },
+    ropsten: {
+      provider: () =>
+        new HDWalletProvider("YOUR_MNEMONIC", "https://ropsten.infura.io/v3/YOUR_INFURA_PROJECT_ID"),
+      network_id: 3,       // Ropsten network id
+      gas: 5500000,        // Ropsten gas limit
+    }
+  },
+  compilers: {
+    solc: {
+      version: "^0.8.0",
+    },
+  },
+};
+
+
+const BankAccount = artifacts.require("BankAccount");
+
+module.exports = function (deployer) {
+  deployer.deploy(BankAccount);
+};
+
+
+truffle migrate --network development
+
+
+truffle console --network development
+
+
+let bank = await BankAccount.deployed();
+
+
+await bank.deposit({ value: web3.utils.toWei("1", "ether"), from: YOUR_ADDRESS });
+
+
+await bank.withdraw(web3.utils.toWei("0.5", "ether"), { from: YOUR_ADDRESS });
+
+
+let balance = await bank.getBalance();
+console.log("Balance:", web3.utils.fromWei(balance, "ether"), "ETH");
+
+
+const BankAccount = artifacts.require("BankAccount");
+
+contract("BankAccount", (accounts) => {
+  let bankInstance;
+
+  before(async () => {
+    bankInstance = await BankAccount.deployed();
+  });
+
+  it("should deposit money", async () => {
+    await bankInstance.deposit({ from: accounts[0], value: web3.utils.toWei("1", "ether") });
+    const balance = await bankInstance.getBalance();
+    assert.equal(balance.toString(), web3.utils.toWei("1", "ether"));
+  });
+
+  it("should withdraw money", async () => {
+    await bankInstance.withdraw(web3.utils.toWei("0.5", "ether"), { from: accounts[0] });
+    const balance = await bankInstance.getBalance();
+    assert.equal(balance.toString(), web3.utils.toWei("0.5", "ether"));
+  });
+});
+
+
+truffle test
