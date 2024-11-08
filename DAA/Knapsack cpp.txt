@@ -51,3 +51,72 @@ int main()
 
 // Time Complexity : O(N)
 // Space Complexity : O(1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*The Knapsack problem is an example of the combinational optimization problem. This problem is also commonly known as the “Rucksack Problem“. 
+The name of the problem is defined from the maximization problem as mentioned below:
+
+Example: 
+Given a bag with maximum weight capacity of W and a set of items, each having a weight and a value associated with it. 
+Decide the number of each item to take in a collection such that the total weight is less than the capacity and the total value is maximized.
+
+
+Types of Knapsack Problem:
+The knapsack problem can be classified into the following types:
+
+1. Fractional Knapsack Problem
+2. 0/1 Knapsack Problem
+3. Bounded Knapsack Problem
+4. Unbounded Knapsack Problem
+
+Variations of Knapsack Problem:
+There are several variations possible for the Knapsack Problem. Some of the well-known variations are provided below:
+
+1. Multi-objective Knapsack problem:
+In this variation, the goal of filling the knapsack changes. Instead of maximizing only the value, there can be several other objectives.
+
+For example: Consider you are organizing a music show in a hall that has a capacity of 10,000. You are organizing a show and the size of the audience depends on the popularity of the singers. Also, the more popular the singer is, the more the fee. You want to maximize the profit and minimize the amount spend on the singer simultaneously and also want to bring as many singers as possible.
+
+2. Multi-dimensional Knapsack problem:
+In this variation of the problem, the weight of any item i is given by an M dimensional vector {wi1, wi2, . . . wiM} and similarly, the capacity of the knapsack is also an M dimensional vector {W1, W2, . . . , WM}.
+
+3. Multiple Knapsack problem:
+This variation of the knapsack problem is similar to the Bin Packing algorithm. The difference in both the problem is here we can pick a subset of the items whereas, in the Bin Packing problem, we have to pack all the items in any of the bins. The idea is that there are multiple knapsacks which may seem like adding capacity to the initial knapsack, but it is not similar to that at all.
+
+    ex: Double Knapsack
+4. Quadratic Knapsack problem:
+This variation has the goal of achieving the maximum value of a quadratic objective function that is subjected to binary and linear capacity constraints.
+
+5. Geometric Knapsack problem:
+In this variation, there is a set of rectangles with different values and a rectangular knapsack. The goal is to pack the largest possible value into the knapsack.
+
+Applications of the Knapsack Problem:
+The Knapsack problem has several real-life applications. Some of them are mentioned here:
+
+1. One of the early applications of the Knapsack problem was in construction and scoring of exams in which the test takers have a choice as to which questions they answer.
+2. The subset sum problem is solved using the concept of the Knapsack problem.
+3. The multiple objective variations of the Knapsack problem is frequently used for transportation logistics optimization problems.
+4. The multiple knapsack problem is often used in many loading and scheduling algorithms in Operational Research.*/
